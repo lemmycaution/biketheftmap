@@ -1,0 +1,35 @@
+body{
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
+#login-buttons{
+  position: fixed;
+  top: 0.5rem;
+  left: 7rem;
+  z-index: 3;
+}
+.login-link-and-dropdown-list{
+  padding: 0.5rem;
+  background: #fff;
+}
+.accounts-dialog{
+  margin:0;
+  border-radius: 0;
+}
+form{
+  position: fixed;
+  top: 5rem;
+  left: 0.5rem;
+  z-index: 2;
+  
+  background: white;
+  padding: 1rem;
+}
+.map-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
