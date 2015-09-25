@@ -198,6 +198,9 @@ if (Meteor.isServer) {
 }
 
 if (Meteor.isClient) {
+  const MAPBOX_KEY = 'pk.eyJ1Ijoib251cnV5YXIiLCJhIjoiWDVxcEFPQSJ9.J0rUBNRgkBeLFwr0Kzjt-g'
+  const MAPBOX_TOKEN = 'sk.eyJ1Ijoib251cnV5YXIiLCJhIjoiNUd5RmJkNCJ9.aGhtPeTAek_9aSf9nPSKGg'
+  const MAP_ID = 'mapbox.streets'
   const MAP_ZOOM = 15
   const HEATMAP_OPACITY = 0.2
   const HEATMAP_RADIUS = 115
@@ -218,104 +221,143 @@ if (Meteor.isClient) {
   //   'rgba(255, 0, 0, 1)'
   // ]
   const ACTIVE_LOCATION = 'activelocation'
-  const GOOGLE_MAPS_LIBS = ['https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/markerclustererplus/src/markerclusterer_packed.js']
+  // const GOOGLE_MAPS_LIBS = ['https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/markerclustererplus/src/markerclusterer_packed.js']
   const MAP_UPDATE_INTERVAL = 500
 
-  let markers = {}, infoWindow, 
-      heatmap, markerCluster,
-      heatmapData, markerClusterData
+  // let markers = {}, infoWindow,
+  //     heatmap, markerCluster,
+  //     heatmapData, markerClusterData
+  let map, heat, markers
 
   Meteor.startup(() => {
-    GoogleMaps.load({ v: '3.exp', libraries: 'visualization' })
-    GOOGLE_MAPS_LIBS.forEach((lib) => GoogleMaps.loadUtilityLibrary(lib))
+    // GoogleMaps.load({ v: '3.exp', libraries: 'visualization' })
+    // GOOGLE_MAPS_LIBS.forEach((lib) => GoogleMaps.loadUtilityLibrary(lib))
+    Mapbox.debug = true
+    Mapbox.load({
+        plugins: ['markercluster', 'heat']
+    });
   })
 
   // Map
   Template.map.helpers({
-    geolocationError: function() {
-      var error = Geolocation.error()
-      return error && error.message
-    },
-    mapOptions: function() {
-      // set active location from geolocation from device 
-      // var latLng = Geolocation.latLng()
-      // set location to bethnal green
-      var latLng = {lat: 51.5279475, lng: -0.0685651}
-      Session.set(ACTIVE_LOCATION, latLng)
-      // Initialize the map once we have the latLng.
-      if (GoogleMaps.loaded() && latLng) {
-        return {
-          center: new google.maps.LatLng(latLng.lat, latLng.lng),
-          zoom: MAP_ZOOM
-        }
-      }
-    }
+    // geolocationError: function() {
+    //   var error = Geolocation.error()
+    //   return error && error.message
+    // },
+    // mapOptions: function() {
+    //   // set active location from geolocation from device
+    //   // var latLng = Geolocation.latLng()
+    //   // set location to bethnal green
+    //   var latLng = {lat: 51.5279475, lng: -0.0685651}
+    //   Session.set(ACTIVE_LOCATION, latLng)
+    //   // Initialize the map once we have the latLng.
+    //   if (GoogleMaps.loaded() && latLng) {
+    //     return {
+    //       center: new google.maps.LatLng(latLng.lat, latLng.lng),
+    //       zoom: MAP_ZOOM
+    //     }
+    //   }
+    // }
   })
   Template.map.onCreated(function () {
+      var latLng = {lat: 51.5279475, lng: -0.0685651}
+      Session.set(ACTIVE_LOCATION, latLng)
     // maps ready?
-    GoogleMaps.ready('map', (map) => {
-      // store infoWindow
-      infoWindow = new google.maps.InfoWindow()
-      //throttled versions of update methods
-      let updateHeatmap = _.throttle(() => heatmap.setData(heatmapData), MAP_UPDATE_INTERVAL)
-      let updateMarkerCluster = _.throttle(() => {
-          markerCluster.clearMarkers()
-          markerCluster.addMarkers(markerClusterData)
-      }, MAP_UPDATE_INTERVAL)
-      // update map reactively
+    // GoogleMaps.ready('map', (map) => {
+    //   // store infoWindow
+    //   infoWindow = new google.maps.InfoWindow()
+    //   //throttled versions of update methods
+    //   let updateHeatmap = _.throttle(() => heatmap.setData(heatmapData), MAP_UPDATE_INTERVAL)
+    //   let updateMarkerCluster = _.throttle(() => {
+    //       markerCluster.clearMarkers()
+    //       markerCluster.addMarkers(markerClusterData)
+    //   }, MAP_UPDATE_INTERVAL)
+    //   // update map reactively
       this.autorun(function () {
+        if (!Mapbox.loaded()) return
+
         // subscribe to crimes for current location
         let loc = Session.get(ACTIVE_LOCATION), crimes = Crimes.find()
         if (loc) Meteor.subscribe("crimes", {lat: loc.lat, lng: loc.lng})
-        // create markers
-        crimes.forEach((crime) => {
-          let position = new google.maps.LatLng(...crime.location.coordinates)
-          if (markers[crime._id]) {
-              markers[crime._id].setPosition(position)
-          }else{
-            markers[crime._id] = new google.maps.Marker({
-              position: position,
-              map: map.instance
-            })
-            markers[crime._id].addListener('click', function() {
-              map.instance.setCenter(position)
-              infoWindow.setContent(`<pre>${JSON.stringify(crime, null, 2)}</pre>`)
-              infoWindow.open(map.instance, markers[crime._id])
-              // if (crime.owner === Meteor.userId()) {
-              //   Session.set(ACTIVE_INCIDENT, incident._id)
+
+        if (!map) {
+          L.mapbox.accessToken = MAPBOX_KEY
+          map = L.mapbox.map("map", MAP_ID).setView(loc, MAP_ZOOM)
+          heat = L.heatLayer([], {maxZoom: MAP_ZOOM + 2}).addTo(map)
+          map.on({
+              // movestart: function () { draw = false; },
+              moveend:   function () { Session.set(ACTIVE_LOCATION, map.getCenter()) },
+              // mousemove: function (e) {
+              //     if (draw) {
+              //         heat.addLatLng(e.latlng);
+              //     }
               // }
-            });
-          }
+          })
+          markers = new L.MarkerClusterGroup()
+          console.log(markers)
+          map.addLayer(markers)
+        }
+        // if (map) map.setView(loc, MAP_ZOOM)
+        if (heat) heat.setLatLngs(crimes.map((crime) => crime.location.coordinates))
+
+        // create markers
+        markers.clearLayers()
+        crimes.forEach((crime) => {
+          let title = `${crime.id}, ${crime.date}`
+          let marker = L.marker(new L.LatLng(...crime.location.coordinates), {
+              icon: L.mapbox.marker.icon({'marker-symbol': 'post', 'marker-color': '0044FF'}),
+              // title: title
+          });
+          marker.bindPopup(`<pre>${JSON.stringify(crime.outcome_status, null, 2)}</pre>`)
+          markers.addLayer(marker)
+        //   // let position = new google.maps.LatLng(...crime.location.coordinates)
+        //   if (markers[crime._id]) {
+        //       // markers[crime._id].setPosition(position)
+        //   }else{
+        //     // markers[crime._id] = new google.maps.Marker({
+        //     //   position: position,
+        //     //   map: map.instance
+        //     // })
+        //     // markers[crime._id].addListener('click', function() {
+        //     //   map.instance.setCenter(position)
+        //     //   infoWindow.setContent(`<pre>${JSON.stringify(crime, null, 2)}</pre>`)
+        //     //   infoWindow.open(map.instance, markers[crime._id])
+        //     //   // if (crime.owner === Meteor.userId()) {
+        //     //   //   Session.set(ACTIVE_INCIDENT, incident._id)
+        //     //   // }
+        //     // });
+        //   }
         })
         // create clusters
-        markerClusterData = _.values(markers)
-        if (markerCluster) {
-          updateMarkerCluster()
-        }else{
-          markerCluster = new MarkerClusterer(map.instance, markerClusterData)
-        }
-        // create heatmap
-        heatmapData = crimes.map((crime) => new google.maps.LatLng(...crime.location.coordinates))
-        // heatmapData = markerCluster.getClusters().map((cluster) => {
-        //   return {location: cluster.getCenter(), weight: cluster.getSize()}
-        // })
-        if (heatmap) {
-          updateHeatmap()
-        } else {
-          heatmap = new google.maps.visualization.HeatmapLayer({
-            data: heatmapData,
-            map: map.instance,
-            radius: HEATMAP_RADIUS,
-            opacity: HEATMAP_OPACITY,
-            // gradient: HEATMAP_GRADIENT
-          })
-        }
+        // markerClusterData = _.values(markers)
+ //        if (markerCluster) {
+ //          updateMarkerCluster()
+ //        }else{
+ //          markerCluster = new MarkerClusterer(map.instance, markerClusterData)
+ //        }
+ //        // create heatmap
+ //        heatmapData = crimes.map((crime) => new google.maps.LatLng(...crime.location.coordinates))
+ //        // heatmapData = markerCluster.getClusters().map((cluster) => {
+ //        //   return {location: cluster.getCenter(), weight: cluster.getSize()}
+ //        // })
+ //        if (heatmap) {
+ //          updateHeatmap()
+ //        } else {
+ //          heatmap = new google.maps.visualization.HeatmapLayer({
+ //            data: heatmapData,
+ //            map: map.instance,
+ //            radius: HEATMAP_RADIUS,
+ //            opacity: HEATMAP_OPACITY,
+ //            // gradient: HEATMAP_GRADIENT
+ //          })
+ //        }
+ 
       })
-      // when user drag maps, change active location to map center
-      map.instance.addListener('center_changed', function() {
-        let mapCenter = map.instance.getCenter()
-        Session.set(ACTIVE_LOCATION, {lat: mapCenter.G || mapCenter.H, lng: mapCenter.K || mapCenter.L})
-      })
-    })
+    //   // when user drag maps, change active location to map center
+    //   map.instance.addListener('center_changed', function() {
+    //     let mapCenter = map.instance.getCenter()
+    //     Session.set(ACTIVE_LOCATION, {lat: mapCenter.G || mapCenter.H, lng: mapCenter.K || mapCenter.L})
+    //   })
+    // })
   })
 }

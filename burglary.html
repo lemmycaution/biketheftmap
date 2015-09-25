@@ -1,6 +1,23 @@
 <head>
-  <title>burglary</title>
-</head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <title>Burglary</title>
+  <meta name="description" content="Conflict free house sharing">
+  
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+  <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1" media="(device-height: 568px)" />
+  <meta http-equiv="cleartype" content="on">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Burglary">
+  
+  <!-- <link rel="shortcut icon" type="image/png" href="/home152.png" sizes="16x16 32x32 64x64">
+  <link rel="apple-touch-icon" sizes="72x72" href="home152.png"> -->
+</head> 
 
 <body>
   {{> loginButtons}}
@@ -11,11 +28,5 @@
 </body>
 
 <template name="map">  
-  <div class="map-container">
-    {{#unless geolocationError}}
-      {{> googleMap name="map" options=mapOptions}}
-    {{else}}
-      Geolocation failed: {{geolocationError}}
-    {{/unless}}
-  </div>
+  <div id="map" class="mapbox"></div>
 </template>  
