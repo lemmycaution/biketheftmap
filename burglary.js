@@ -283,7 +283,7 @@ if (Meteor.isClient) {
         if (!map) {
           L.mapbox.accessToken = MAPBOX_KEY
           map = L.mapbox.map("map", MAP_ID).setView(loc, MAP_ZOOM)
-          heat = L.heatLayer([], {maxZoom: MAP_ZOOM + 2}).addTo(map)
+          heat = L.heatLayer([], {maxZoom: MAP_ZOOM}).addTo(map)
           map.on({
               // movestart: function () { draw = false; },
               moveend:   function () { Session.set(ACTIVE_LOCATION, map.getCenter()) },
