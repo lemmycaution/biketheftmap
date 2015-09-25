@@ -293,10 +293,10 @@ if (Meteor.isClient) {
           markerCluster = new MarkerClusterer(map.instance, markerClusterData)
         }
         // create heatmap
-        // heatmapData = crimes.map((crime) => new google.maps.LatLng(...crime.location.coordinates))
-        heatmapData = markerCluster.getClusters().map((cluster) => {
-          return {location: cluster.getCenter(), weight: cluster.getSize()}
-        })
+        heatmapData = crimes.map((crime) => new google.maps.LatLng(...crime.location.coordinates))
+        // heatmapData = markerCluster.getClusters().map((cluster) => {
+        //   return {location: cluster.getCenter(), weight: cluster.getSize()}
+        // })
         if (heatmap) {
           updateHeatmap()
         } else {
