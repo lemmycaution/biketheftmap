@@ -259,7 +259,7 @@ if (Meteor.isClient) {
     //   }
     // }
   })
-  Template.map.onCreated(function () {
+  Template.map.onRendered(function () {
       var latLng = {lat: 51.5279475, lng: -0.0685651}
       Session.set(ACTIVE_LOCATION, latLng)
     // maps ready?
