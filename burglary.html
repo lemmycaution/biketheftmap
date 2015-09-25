@@ -5,42 +5,14 @@
 <body>
   {{> loginButtons}}
 
-  {{#unless currentUser}}
-    <h1>Welcome to Burglary!</h1>
-  {{else}}
+  {{#if currentUser}}
     {{> map}}
-    {{> incidentForm}}
-  {{/unless}}
-</body>
 
-<template name="incidentForm">
-  <form>
-  {{#unless hasActiveIncident}}
-    <button>Report Incident</button>
-  {{else}}
-    {{#unless incidentUpdated}}
-      <h2>Incident recorded</h2>
-      <p>We are sorry to hear that your bike has been stolen.<br/>
-        Please fill out details about your bicycle to increase chance to find it</p>
-    {{else}}
-      <h2>Incident Updated</h2>
-      <p>Yes it's hard but please don't worry about your bike, life is going on at least.</p>
-    {{/unless}}
-    <input type="type" name="brand" placeholder="Brand" value="{{activeIncident.details.brand}}" />
-    <input type="type" name="model" placeholder="Model" value="{{activeIncident.details.model}}" />
-    <input type="number" name="price" placeholder="Price" value="{{activeIncident.details.price}}" />
-    <input type="submit" value="Update Incident">
-    <input type="reset" value="Delete Incident">
-  {{/unless}}
-  </form>
-</template>
+  {{/if}}
+</body>
 
 <template name="map">  
   <div class="map-container">
-    {{#unless geolocationError}}
-      {{> googleMap name="map" options=mapOptions}}
-    {{else}}
-      Geolocation failed: {{geolocationError}}
-    {{/unless}}
+
   </div>
 </template>  
