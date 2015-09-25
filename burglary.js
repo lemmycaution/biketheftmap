@@ -238,7 +238,9 @@ if (Meteor.isClient) {
     },
     mapOptions: function() {
       // set active location from geolocation from device 
-      var latLng = Geolocation.latLng()
+      // var latLng = Geolocation.latLng()
+      // set location to bethnal green
+      var latLng = {lat: 51.5279475, lng: -0.0685651}
       Session.set(ACTIVE_LOCATION, latLng)
       // Initialize the map once we have the latLng.
       if (GoogleMaps.loaded() && latLng) {
