@@ -201,12 +201,13 @@ if (Meteor.isClient) {
   const HEATMAP_OPACITY = 0.2
   const HEATMAP_RADIUS = 75
   const ACTIVE_LOCATION = 'activelocation'
+  const GOOGLE_MAPS_LIBS = ['https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/markerclustererplus/src/markerclusterer_packed.js']
 
   let markers = {}, infoWindow = null, heatmap = null, markerCluster = null
 
   Meteor.startup(() => {
     GoogleMaps.load({ v: '3', libraries: 'visualization' })
-    GoogleMaps.loadUtilityLibrary('http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/markerclustererplus/src/markerclusterer_packed.js')
+    GOOGLE_MAPS_LIBS.forEach((lib) => GoogleMaps.loadUtilityLibrary(lib))
   })
 
   // Map
