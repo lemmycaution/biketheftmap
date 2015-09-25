@@ -131,12 +131,13 @@ if (Meteor.isServer) {
   const MAX_DISTANCE = 1600 // 1 mile in meters
 
   // index for geo spatial search
-  Meteor.startup(() => Crimes._ensureIndex({latlng: "2dsphere"}))
+  Meteor.startup(() => Crimes._ensureIndex({location: "2dsphere"}))
 
   // server: publish street level bicycle theft crimes for location and date
   Meteor.publish('crimes', function (params) {
     let countryCode, startDate, endDate, crimes, fds, handle
 
+    // console.log('publish crimes params', params)
     check(params, {lat: Number, lng: Number})
 
     //TODO: get country code by location
@@ -199,14 +200,33 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
   const MAP_ZOOM = 15
   const HEATMAP_OPACITY = 0.2
-  const HEATMAP_RADIUS = 75
+  const HEATMAP_RADIUS = 115
+  // const HEATMAP_GRADIENT = [
+  //   'rgba(0, 255, 255, 0)',
+  //   'rgba(0, 255, 255, 1)',
+  //   'rgba(0, 191, 255, 1)',
+  //   'rgba(0, 127, 255, 1)',
+  //   'rgba(0, 63, 255, 1)',
+  //   'rgba(0, 0, 255, 1)',
+  //   'rgba(0, 0, 223, 1)',
+  //   'rgba(0, 0, 191, 1)',
+  //   'rgba(0, 0, 159, 1)',
+  //   'rgba(0, 0, 127, 1)',
+  //   'rgba(63, 0, 91, 1)',
+  //   'rgba(127, 0, 63, 1)',
+  //   'rgba(191, 0, 31, 1)',
+  //   'rgba(255, 0, 0, 1)'
+  // ]
   const ACTIVE_LOCATION = 'activelocation'
   const GOOGLE_MAPS_LIBS = ['https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/markerclustererplus/src/markerclusterer_packed.js']
+  const MAP_UPDATE_INTERVAL = 500
 
-  let markers = {}, infoWindow = null, heatmap = null, markerCluster = null
+  let markers = {}, infoWindow, 
+      heatmap, markerCluster,
+      heatmapData, markerClusterData
 
   Meteor.startup(() => {
-    GoogleMaps.load({ v: '3', libraries: 'visualization' })
+    GoogleMaps.load({ v: '3.exp', libraries: 'visualization' })
     GOOGLE_MAPS_LIBS.forEach((lib) => GoogleMaps.loadUtilityLibrary(lib))
   })
 
@@ -232,12 +252,20 @@ if (Meteor.isClient) {
   Template.map.onCreated(function () {
     // maps ready?
     GoogleMaps.ready('map', (map) => {
+      // store infoWindow
       infoWindow = new google.maps.InfoWindow()
+      //throttled versions of update methods
+      let updateHeatmap = _.throttle(() => heatmap.setData(heatmapData), MAP_UPDATE_INTERVAL)
+      let updateMarkerCluster = _.throttle(() => {
+          markerCluster.clearMarkers()
+          markerCluster.addMarkers(markerClusterData)
+      }, MAP_UPDATE_INTERVAL)
+      // update map reactively
       this.autorun(function () {
         // subscribe to crimes for current location
-        let loc = Session.get(ACTIVE_LOCATION), crimes = Crimes.find(), heatmapData, markerClusterData
+        let loc = Session.get(ACTIVE_LOCATION), crimes = Crimes.find()
         if (loc) Meteor.subscribe("crimes", {lat: loc.lat, lng: loc.lng})
-
+        // create markers
         crimes.forEach((crime) => {
           let position = new google.maps.LatLng(...crime.location.coordinates)
           if (markers[crime._id]) {
@@ -257,32 +285,34 @@ if (Meteor.isClient) {
             });
           }
         })
-
-        heatmapData = crimes.map((crime) => new google.maps.LatLng(...crime.location.coordinates))
+        // create clusters
+        markerClusterData = _.values(markers)
+        if (markerCluster) {
+          updateMarkerCluster()
+        }else{
+          markerCluster = new MarkerClusterer(map.instance, markerClusterData)
+        }
+        // create heatmap
+        // heatmapData = crimes.map((crime) => new google.maps.LatLng(...crime.location.coordinates))
+        heatmapData = markerCluster.getClusters().map((cluster) => {
+          return {location: cluster.getCenter(), weight: cluster.getSize()}
+        })
         if (heatmap) {
-          heatmap.setData(heatmapData)
+          updateHeatmap()
         } else {
           heatmap = new google.maps.visualization.HeatmapLayer({
             data: heatmapData,
             map: map.instance,
             radius: HEATMAP_RADIUS,
-            opacity: HEATMAP_OPACITY
+            opacity: HEATMAP_OPACITY,
+            // gradient: HEATMAP_GRADIENT
           })
         }
-
-        markerClusterData = _.values(markers)
-        if (markerCluster) {
-          markerCluster.clearMarkers()
-          markerCluster.addMarkers(markerClusterData)
-        }else{
-          markerCluster = new MarkerClusterer(map.instance, markerClusterData)
-        }
-
       })
       // when user drag maps, change active location to map center
       map.instance.addListener('center_changed', function() {
         let mapCenter = map.instance.getCenter()
-        Session.set(ACTIVE_LOCATION, {lat: mapCenter.G, lng: mapCenter.K})
+        Session.set(ACTIVE_LOCATION, {lat: mapCenter.G || mapCenter.H, lng: mapCenter.K || mapCenter.L})
       })
     })
   })
