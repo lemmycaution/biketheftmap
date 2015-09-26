@@ -65,9 +65,46 @@ if (Meteor.isServer) {
       // stop publisher when client unsubscribe
       this.onStop(() => handle.stop())
 
-    // return existing crimes form local db
+      // return existing crimes form local db
     } else {
       return features
+    }
+  })
+
+  Meteor.methods({
+    addFeature: function (data) {
+      // Make sure the user is logged in before inserting a task
+      if (! Meteor.userId()) {
+        throw new Meteor.Error("not-authorized")
+      }
+
+      return Features.insert(Feature.transform({
+        lat: data.lat,
+        lng: data.lng,
+        properties: _.extend(data.properties || {}, {
+          id: Meteor.uuid(), //generate uniq id to mimic external api uuids
+          date: new Date(), //set date to now for new records
+          owner: Meteor.userId()
+        })
+      }))
+    },
+    updateFeature: function (featureId, data) {
+      let feature = Features.findOne(featureId)
+      // Make sure only the incident owner can update the incident
+      if (feature.properties.owner !== Meteor.userId()) {
+        throw new Meteor.Error("not-authorized")
+      }
+      
+      return Features.update(featureId, {$set : data})
+    },
+    removeFeature: function (featureId) {
+      let feature = Features.findOne(featureId)
+      // Make sure only the incident owner can update the incident
+      if (feature.properties.owner !== Meteor.userId()) {
+        throw new Meteor.Error("not-authorized")
+      }
+
+      return Features.remove(featureId)
     }
   })
 }

@@ -22,9 +22,39 @@
 <body>
   {{> loginButtons}}
 
+  {{#if currentUser}}
+  {{> form}}
+  {{/if}}
+
   {{> map}}
 </body>
 
 <template name="map">  
   <div id="map" class="mapbox"></div>
+</template>
+
+<template name="form">  
+  {{#if geolocationError}}
+    <p>Geolocation failed: {{geolocationError}}</p>
+  {{else}}
+    <form>
+      {{#unless hasActiveFeature}}
+        <button>Report</button>
+      {{else}}
+        <div class="relative"><a href="#" class="close absolute right-0 top-0 m1">&times;</a></div>
+        {{#unless featureUpdated}}
+          <p>We are sorry to hear that your bike has been stolen.<br/>
+            Please fill out details about your bicycle to increase chance to find it</p>
+        {{else}}
+          <p>Yes it's hard but please don't worry about your bike, life is going on at least.</p>
+        {{/unless}}
+        <input type="text" name="brand" placeholder="Brand" value="{{activeFeature.properties.meta.brand}}" />
+        <input type="text" name="model" placeholder="Model" value="{{activeFeature.properties.meta.model}}" />
+        <input type="number" name="price" placeholder="Price" value="{{activeFeature.properties.meta.price}}" />
+        <textarea name="description" placeholder="Description" value="{{activeFeature.properties.meta.description}}"></textarea>
+        <input type="submit" value="Update">
+        <input type="reset" value="Delete">
+      {{/unless}}
+    </form>
+  {{/if}}
 </template>  

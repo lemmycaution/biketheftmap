@@ -2,7 +2,7 @@ if (!(typeof MochaWeb === 'undefined')){
   MochaWeb.testOnly(function () {
     describe('Features', function () {
       it('should transform doc to geoJSON feature', function () {
-        var feature = Feature.transform({lat: 102.0, lng: 0.5, id: 'test'})
+        var feature = Feature.transform({lat: 102.0, lng: 0.5, properties: {id: 'test', owner: 'testowner'}})
         var expected = {
           type: 'Feature',
           geometry: {
@@ -12,7 +12,9 @@ if (!(typeof MochaWeb === 'undefined')){
           properties: {
             id: 'test',
             category: 'bicycle-theft',
-            date: feature.properties.date
+            date: feature.properties.date,
+            owner: 'testowner',
+            meta: {}
           }
         }
         chai.assert.deepEqual(expected, feature)
