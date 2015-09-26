@@ -1,0 +1,18 @@
+body { 
+  margin:0; 
+  padding:0; 
+  font-family: Helvetica,Arial,sans-serif; 
+}
+pre { overflow:scroll; }
+#map { 
+  position:absolute; 
+  top:0; 
+  bottom:0; 
+  width:100%; 
+}
+#login-buttons{
+  position: fixed;
+  z-index: 2;
+  top: 2rem;
+  left: 4rem;
+}
