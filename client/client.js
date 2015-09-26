@@ -1,7 +1,7 @@
 if (Meteor.isClient) {
   const MAPBOX_KEY = 'pk.eyJ1Ijoib251cnV5YXIiLCJhIjoiWDVxcEFPQSJ9.J0rUBNRgkBeLFwr0Kzjt-g'
   const MAP_ID = 'mapbox.streets'
-  const MAP_ZOOM = 15
+  const MAP_ZOOM = 20
 
   const ACTIVE_LOCATION = 'activelocation'
   const GEONAMES_USERNAME = 'onuruyar'
@@ -9,13 +9,16 @@ if (Meteor.isClient) {
   const ACTIVE_FEATURE = 'activefeature'
   const FEATURE_UPDATED = 'featureupdated'
 
-  let map, markers, directions
+  const COUNT_DISTANCE = 200
+  const COUNT_UNIT = 'meters'
+
+  let map, markers, directions, turfLayer
   // heat = null
 
   Meteor.startup(() => {
     Mapbox.debug = true
     Mapbox.load({
-      plugins: ['markercluster'] //, 'heat', 'directions']
+      plugins: ['markercluster', 'turf'] //, 'heat', 'directions']
     })
     // reset session
     Session.setDefault(ACTIVE_FEATURE, null)
@@ -29,12 +32,11 @@ if (Meteor.isClient) {
       let activeFeature
       if (map) {
         if (Session.get(ACTIVE_FEATURE) && (activeFeature = Features.findOne(Session.get(ACTIVE_FEATURE)))) {
-          map.setView(activeFeature.geometry.coordinates, 20)
+          map.setView(activeFeature.geometry.coordinates, MAP_ZOOM)
         }
         map.invalidateSize({debounceMoveend: true})
       }
-      
-      
+
       let latLng = Geolocation.latLng() // {lat: 51.5279475, lng: -0.0685651}
 
       // wait for map to load
@@ -64,6 +66,8 @@ if (Meteor.isClient) {
       // initialize map for first time
       if (!map) {
         L.mapbox.accessToken = MAPBOX_KEY
+        // L.mapbox.geocoder('mapbox.places').reverseQuery(loc, (err,data) => console.log(data))
+
         // create map and set view
         map = L.mapbox.map('map', MAP_ID).setView(loc, MAP_ZOOM)
         // add heatmap
@@ -80,6 +84,13 @@ if (Meteor.isClient) {
         //     profile: 'mapbox.cycling'
         // })
         // L.mapbox.directions.layer(directions).addTo(map)
+        turfLayer = L.mapbox.featureLayer([], {
+          color: '#fff',      // Stroke color
+          opacity: 1,         // Stroke opacity
+          // weight: 1,         // Stroke weight
+          fillColor: '#000',  // Fill color
+          fillOpacity: 0.6    // Fill opacity
+        }).addTo(map)
       }
 
       // add features to heatmap
@@ -131,6 +142,13 @@ if (Meteor.isClient) {
           //   break
           // }
         })
+
+        let pt = {type: 'Feature', geometry: {type:'Point', coordinates: [loc.lng,loc.lat]} }
+        let area = turf.buffer(pt, COUNT_DISTANCE, COUNT_UNIT)
+        // var result = turf.featurecollection([area, pt])
+        turfLayer.setGeoJSON(area)
+        let within = turf.within({type: 'FeatureCollection', features: features.map((f)=>{f.geometry.coordinates = f.geometry.coordinates.reverse();return f})}, area)
+        Session.set('theftCount', within.features.length)
       }
     })
   })
@@ -144,6 +162,9 @@ if (Meteor.isClient) {
 
   // Form
   Template.form.helpers({
+    theftCount: function () {
+      return Session.get('theftCount')
+    },
     geolocationError: function() {
       let error = Geolocation.error()
       return error && error.message

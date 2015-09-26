@@ -40,10 +40,11 @@
     <p>Geolocation failed: {{geolocationError}}</p>
   {{else}}
     <form>
+      <div>{{theftCount}}</div>
       {{#unless hasActiveFeature}}
         <button>Report</button>
       {{else}}
-        <div class="relative"><a href="#" class="close absolute right-0 top-0 m1">&times;</a></div>
+        <div class="relative"><a href="#" class="close absolute right-0 top-0">&times;</a></div>
         {{#unless featureUpdated}}
           <p>We are sorry to hear that your bike has been stolen.<br/>
             Please fill out details about your bicycle to increase chance to find it</p>
