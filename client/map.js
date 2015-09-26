@@ -10,6 +10,21 @@ Template.map.onRendered(function () {
         activeFeature,
         area,
         within
+    
+    function calculateTheftCount () {
+      // let pt = {type: 'Feature', geometry: {type:'Point', coordinates: [loc.lng,loc.lat]} }
+      area = turf.buffer(turf.point([loc.lng,loc.lat]), C.COUNT_DISTANCE * (C.MAP_ZOOM - map.getZoom() + 1), C.COUNT_UNIT)
+      // var result = turf.featurecollection([area, pt])
+      turfLayer.setGeoJSON(area)
+      within = turf.within({
+        type: 'FeatureCollection', 
+        features: features.map((f) => {
+          f.geometry.coordinates = f.geometry.coordinates.reverse()
+          return f
+        })
+      }, area)
+      Session.set(C.THEFT_COUNT, within.features.length)
+    }
 
     // wait for map and location
     if (!Mapbox.loaded() || !geoLoc) return
@@ -52,7 +67,8 @@ Template.map.onRendered(function () {
       map = L.mapbox.map('map', C.MAP_ID)
         .setView(loc, C.MAP_ZOOM)
         .on({
-          moveend: function () { Session.set(C.ACTIVE_LOCATION, map.getCenter()) }
+          moveend: function () { Session.set(C.ACTIVE_LOCATION, map.getCenter()) },
+          zoomend: calculateTheftCount
         })
 
       // add marker cluster
@@ -112,18 +128,7 @@ Template.map.onRendered(function () {
       }
     })
 
-    // let pt = {type: 'Feature', geometry: {type:'Point', coordinates: [loc.lng,loc.lat]} }
-    area = turf.buffer(turf.point([loc.lng,loc.lat]), C.COUNT_DISTANCE, C.COUNT_UNIT)
-    // var result = turf.featurecollection([area, pt])
-    turfLayer.setGeoJSON(area)
-    within = turf.within({
-      type: 'FeatureCollection', 
-      features: features.map((f) => {
-        f.geometry.coordinates = f.geometry.coordinates.reverse()
-        return f
-      })
-    }, area)
-    Session.set(C.THEFT_COUNT, within.features.length)
+    calculateTheftCount()
 
     userMarker.setLatLng(geoLoc)
 

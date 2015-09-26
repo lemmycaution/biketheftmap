@@ -3,7 +3,7 @@ C = (function(){
     // Map related stuff
     MAP_KEY: 'pk.eyJ1Ijoib251cnV5YXIiLCJhIjoiWDVxcEFPQSJ9.J0rUBNRgkBeLFwr0Kzjt-g',
     MAP_ID: 'dara.041ae67f',
-    MAP_ZOOM: 20,
+    MAP_ZOOM: 18,
     MAP_PLUGINS: ['markercluster', 'turf' /*, 'heat', 'directions'*/],
 
     // Session vars
