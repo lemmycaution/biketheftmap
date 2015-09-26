@@ -1,15 +1,19 @@
+* { box-sizing: border-box; }
 body { 
   margin: 0; 
   padding: 0; 
   font-family: Helvetica,Arial,sans-serif; 
 }
 pre { overflow: scroll; max-width: 25vw; max-height: 20vh; }
-#map { 
+.mapbox { 
   position: absolute; 
   top: 0; 
   bottom: 0; 
   width: 100%; 
   z-index: 1;
+}
+.hasActiveFeature .mapbox{
+  height: 50%;
 }
 #login-buttons{
   position: fixed;
@@ -20,14 +24,18 @@ pre { overflow: scroll; max-width: 25vw; max-height: 20vh; }
 form{
   position: fixed;
   z-index: 2;
-  top: 5rem;
-  left: 4rem;
-  
-  max-width: 25vw;
+  bottom: 0;
+  left: 0;
+
+  overflow: auto;
   background-color: white;
   padding: 1rem;
   border: 1px solid gray;
   border-radius: 3px;
+}
+.hasActiveFeature form{
+  width: 100%;
+  height: 50%;
 }
 input,textarea{
   border: 1px solid gray;

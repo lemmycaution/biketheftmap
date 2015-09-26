@@ -26,10 +26,14 @@ if (Meteor.isClient) {
   Template.map.onRendered(function () {
 
     this.autorun(() => {
-      if (map && Session.get(ACTIVE_FEATURE)) {
-        let activeFeature = Features.findOne(Session.get(ACTIVE_FEATURE))
-        if (activeFeature) map.setView(activeFeature.geometry.coordinates, 20)
+      let activeFeature
+      if (map) {
+        if (Session.get(ACTIVE_FEATURE) && (activeFeature = Features.findOne(Session.get(ACTIVE_FEATURE)))) {
+          map.setView(activeFeature.geometry.coordinates, 20)
+        }
+        map.invalidateSize({debounceMoveend: true})
       }
+      
       
       let latLng = Geolocation.latLng() // {lat: 51.5279475, lng: -0.0685651}
 
@@ -100,7 +104,9 @@ if (Meteor.isClient) {
           markers.addLayer(marker)
           if (userMarker) {
             marker.on({
-              click: () => Session.set(ACTIVE_FEATURE, marker.feature._id),
+              click: () => {
+                Session.set(ACTIVE_FEATURE, marker.feature._id)
+              },
               dragend: (e) => {
                 let loc = e.target.getLatLng()
                 Meteor.call('updateFeature', marker.feature._id, {'geometry.coordinates': [loc.lat, loc.lng]}, function (error, result) {
@@ -129,6 +135,13 @@ if (Meteor.isClient) {
     })
   })
 
+  // Body
+  Template.body.helpers({
+    hasActiveFeature: function () {
+      return Session.get(ACTIVE_FEATURE)
+    },
+  })
+
   // Form
   Template.form.helpers({
     geolocationError: function() {
@@ -155,6 +168,7 @@ if (Meteor.isClient) {
       let featureId, data
 
       e.preventDefault()
+
       // if session has active feature created previously call update
       featureId = Session.get(ACTIVE_FEATURE)
       if (featureId) {
