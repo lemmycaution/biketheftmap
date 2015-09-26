@@ -27,6 +27,8 @@
   {{> form}}
   {{/if}}
 
+  <div class="theftCount" style="background-color:rgb(255,{{theftCountColor}},{{theftCountColor}})">{{theftCount}}</div>
+
   {{> map}}
   </div>
 </body>
@@ -40,7 +42,6 @@
     <p>Geolocation failed: {{geolocationError}}</p>
   {{else}}
     <form>
-      <div>{{theftCount}}</div>
       {{#unless hasActiveFeature}}
         <button>Report</button>
       {{else}}

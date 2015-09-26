@@ -4,7 +4,7 @@ if (Meteor.isServer) {
 
   // ensure index for geo spatial search
   Meteor.startup(() => {
-    Features._ensureIndex({geometry: "2dsphere"})
+    Features._ensureIndex({geometry: '2dsphere'})
   })
 
   // server: publish street level bicycle theft crimes as features for location and date
@@ -28,7 +28,7 @@ if (Meteor.isServer) {
       'geometry': {
         $nearSphere: {
           $geometry: {
-            type : "Point",
+            type : 'Point',
             coordinates : [params.lat, params.lng]
           },
           $maxDistance: MAX_DISTANCE
@@ -75,9 +75,23 @@ if (Meteor.isServer) {
     addFeature: function (data) {
       // Make sure the user is logged in before inserting a task
       if (! Meteor.userId()) {
-        throw new Meteor.Error("not-authorized")
+        throw new Meteor.Error('not-authorized')
       }
-
+      
+      let feature = Features.findOne({
+        'properties.owner': Meteor.userId(), 
+        'geometry': {
+          $nearSphere: {
+            $geometry: {
+              type : 'Point',
+              coordinates : [data.lat, data.lng]
+            },
+            $maxDistance: MAX_DISTANCE
+          }
+        }
+      })
+      if (feature) throw new Meteor.Error('You have already reported a burglary on this location')
+      
       return Features.insert(Feature.transform({
         lat: data.lat,
         lng: data.lng,
@@ -92,7 +106,7 @@ if (Meteor.isServer) {
       let feature = Features.findOne(featureId)
       // Make sure only the incident owner can update the incident
       if (feature.properties.owner !== Meteor.userId()) {
-        throw new Meteor.Error("not-authorized")
+        throw new Meteor.Error('not-authorized')
       }
       
       return Features.update(featureId, {$set : data})
@@ -101,7 +115,7 @@ if (Meteor.isServer) {
       let feature = Features.findOne(featureId)
       // Make sure only the incident owner can update the incident
       if (feature.properties.owner !== Meteor.userId()) {
-        throw new Meteor.Error("not-authorized")
+        throw new Meteor.Error('not-authorized')
       }
 
       return Features.remove(featureId)

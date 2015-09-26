@@ -15,11 +15,21 @@ pre { overflow: scroll; max-width: 25vw; max-height: 20vh; }
 .hasActiveFeature .mapbox{
   height: 50%;
 }
+.theftCount{
+  position:fixed;
+  z-index:2;  
+  top: 1.5rem;
+  left: 3rem;
+  padding:0.5rem;
+  background:white;
+  border: 1px solid gray;
+  border-radius: 3px;
+}
 #login-buttons{
   position: fixed;
   z-index: 2;
   top: 2rem;
-  left: 4rem;
+  left: 5rem;
 }
 form{
   position: fixed;
