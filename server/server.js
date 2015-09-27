@@ -86,7 +86,7 @@ if (Meteor.isServer) {
               type : 'Point',
               coordinates : [data.lat, data.lng]
             },
-            $maxDistance: C.C.SEARCH_WITHIN
+            $maxDistance: C.SEARCH_WITHIN
           }
         }
       })
