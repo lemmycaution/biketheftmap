@@ -15,11 +15,11 @@ pre { overflow: scroll; max-width: 25vw; max-height: 20vh; }
 .hasActiveFeature .mapbox{
   height: 50%;
 }
-.theftCount{
+.controls{
   position:fixed;
   z-index:2;  
   top: 1.5rem;
-  left: 3rem;
+  right: 3rem;
   padding:0.5rem;
   background:white;
   border: 1px solid gray;

@@ -1,7 +1,5 @@
 if (Meteor.isServer) {
 
-  const MAX_DISTANCE = 1600 / 2 // 0.5 mile in meters
-
   // ensure index for geo spatial search
   Meteor.startup(() => {
     Features._ensureIndex({geometry: '2dsphere'})
@@ -19,9 +17,9 @@ if (Meteor.isServer) {
 
     // today
     endDate = new Date()
-    // FDS.TIMESPAN_IN_MONTHS back from today
+    // C.TIMESPAN_IN_MONTHS back from today
     startDate = new Date()
-    startDate.setMonth(startDate.getMonth() - FDS.TIMESPAN_IN_MONTHS)
+    startDate.setMonth(startDate.getMonth() - C.TIMESPAN_IN_MONTHS)
 
     // find cached data from local db
     features = Features.find({
@@ -31,9 +29,10 @@ if (Meteor.isServer) {
             type : 'Point',
             coordinates : [params.lat, params.lng]
           },
-          $maxDistance: MAX_DISTANCE
+          $maxDistance: C.SEARCH_DIST
         }
       },
+      'properties.category': 'bicycle-theft',
       'properties.date': {$gt: startDate, $lte: endDate}
     })
 
@@ -80,13 +79,14 @@ if (Meteor.isServer) {
       
       let feature = Features.findOne({
         'properties.owner': Meteor.userId(), 
+        'properties.category': 'bicycle-theft',
         'geometry': {
           $nearSphere: {
             $geometry: {
               type : 'Point',
               coordinates : [data.lat, data.lng]
             },
-            $maxDistance: MAX_DISTANCE
+            $maxDistance: C.C.SEARCH_WITHIN
           }
         }
       })

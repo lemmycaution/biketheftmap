@@ -26,9 +26,10 @@
   {{#if currentUser}}
   {{> form}}
   {{/if}}
-
-  <div class="theftCount" style="background-color:rgb(255,{{theftCountColor}},{{theftCountColor}})">{{theftCount}}</div>
-
+  <div class="controls">
+    <a href="#" class="locate">loc</a>
+    <span class="theftCount" style="background-color:rgb(255,{{theftCountColor}},{{theftCountColor}})">{{theftCount}}</span>
+  </div>
   {{> map}}
   </div>
 </body>
@@ -38,10 +39,10 @@
 </template>
 
 <template name="form">  
+  <form>
   {{#if geolocationError}}
     <p>Geolocation failed: {{geolocationError}}</p>
   {{else}}
-    <form>
       {{#unless hasActiveFeature}}
         <button>Report</button>
       {{else}}
@@ -59,6 +60,6 @@
         <input type="submit" value="Update">
         <input type="reset" value="Delete">
       {{/unless}}
-    </form>
   {{/if}}
+  </form>  
 </template>  

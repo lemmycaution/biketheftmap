@@ -18,3 +18,8 @@ Template.body.helpers({
     return Math.max(255 - ((Session.get(C.THEFT_COUNT) || 0) * 10), 0)
   }
 })
+Template.body.events({
+  'click .locate': function () {
+    map.setView(Geolocation.latLng())
+  }
+})
