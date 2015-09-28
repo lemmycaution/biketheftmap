@@ -90,7 +90,7 @@ if (Meteor.isServer) {
           }
         }
       })
-      if (feature) throw new Meteor.Error('You have already reported a burglary on this location')
+      if (feature) throw new Meteor.Error('You have already reported a theft on this location')
       
       return Features.insert(Feature.transform({
         lat: data.lat,
