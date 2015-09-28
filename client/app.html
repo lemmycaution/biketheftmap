@@ -1,0 +1,65 @@
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <title>Burglary</title>
+  <meta name="description" content="Bicycle theft map">
+  
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+  <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1" media="(device-height: 568px)" />
+  <meta http-equiv="cleartype" content="on">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Burglary">
+  
+  <!-- <link rel="shortcut icon" type="image/png" href="/home152.png" sizes="16x16 32x32 64x64">
+  <link rel="apple-touch-icon" sizes="72x72" href="home152.png"> -->
+</head> 
+
+<body>
+  <div class="{{#if hasActiveFeature}}hasActiveFeature{{/if}}">
+  {{> loginButtons}}
+
+  {{#if currentUser}}
+  {{> form}}
+  {{/if}}
+  <div class="controls">
+    <a href="#" class="locate">loc</a>
+    <span class="theftCount" style="background-color:rgb(255,{{theftCountColor}},{{theftCountColor}})">{{theftCount}}</span>
+  </div>
+  {{> map}}
+  </div>
+</body>
+
+<template name="map">  
+  <div id="map" class="mapbox"></div>
+</template>
+
+<template name="form">  
+  <form>
+  {{#if geolocationError}}
+    <p>Geolocation failed: {{geolocationError}}</p>
+  {{else}}
+      {{#unless hasActiveFeature}}
+        <button>Report</button>
+      {{else}}
+        <div class="relative"><a href="#" class="close absolute right-0 top-0">&times;</a></div>
+        {{#unless featureUpdated}}
+          <p>We are sorry to hear that your bike has been stolen.<br/>
+            Please fill out details about your bicycle to increase chance to find it</p>
+        {{else}}
+          <p>Yes it's hard but please don't worry about your bike, life is going on at least.</p>
+        {{/unless}}
+        <input type="text" name="brand" placeholder="Brand" value="{{activeFeature.properties.meta.brand}}" />
+        <input type="text" name="model" placeholder="Model" value="{{activeFeature.properties.meta.model}}" />
+        <input type="number" name="price" placeholder="Price" value="{{activeFeature.properties.meta.price}}" />
+        <textarea name="description" placeholder="Description" value="{{activeFeature.properties.meta.description}}"></textarea>
+        <input type="submit" value="Update">
+        <input type="reset" value="Delete">
+      {{/unless}}
+  {{/if}}
+  </form>  
+</template>  

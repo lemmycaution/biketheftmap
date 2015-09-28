@@ -21,3 +21,8 @@ accounts-ui
 accounts-password
 accounts-facebook
 mdg:geolocation
+http
+check
+underscore
+pauloborges:mapbox@2.1.5
+mike:mocha
