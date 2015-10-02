@@ -30,6 +30,18 @@ pre { overflow: scroll; max-width: 25vw; max-height: 20vh; }
   z-index: 2;
   top: 2rem;
   left: 5rem;
+  
+  border: 1px solid #cccccc;
+  z-index: 1000;
+  background: white;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+.locate{
+  text-decoration:none;
+  line-height: 16px;
+  font-size: 4rem;
+  vertical-align: middle;
 }
 form{
   position: fixed;
