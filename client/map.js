@@ -1,7 +1,7 @@
 // Map
 map = null
 Template.map.onRendered(function () {
-  let markers, turfLayer, userMarker, countryCode, heat
+  let markers, turfLayer, userMarker, countryCode //, heat
 
   this.autorun(() => {
 
@@ -96,15 +96,15 @@ Template.map.onRendered(function () {
         }),
       }).addTo(map)
       
-      heat = L.heatLayer([], {
-        minOpacity: 0.05,
-        maxZoom: C.MAP_ZOOM,
-        radius: 60,
-        blur: 20,
-        max: 1.2,
-          //gradient
-        zoomAnimation: true
-      }).addTo(map)
+      // heat = L.heatLayer([], {
+ //        minOpacity: 0.05,
+ //        maxZoom: C.MAP_ZOOM,
+ //        radius: 60,
+ //        blur: 20,
+ //        max: 1.2,
+ //          //gradient
+ //        zoomAnimation: true
+ //      }).addTo(map)
     }
 
     // render markers
@@ -119,7 +119,7 @@ Template.map.onRendered(function () {
             draggable: userMarker,
             icon: L.mapbox.marker.icon({
               'marker-symbol': 'danger',
-              'marker-color': belongsToUser ? 'FF0033' : 'E1272A'
+              'marker-color': belongsToUser ? 'E3486C' : 'E1272A'
             }),
           })
 
@@ -150,7 +150,7 @@ Template.map.onRendered(function () {
 
     userMarker.setLatLng(geoLoc)
     
-    heat.setLatLngs(features.map((feature) => feature.geometry.coordinates))
+    // heat.setLatLngs(features.map((feature) => feature.geometry.coordinates))
 
     if (Session.get(C.ACTIVE_FEATURE) && (activeFeature = Features.findOne(Session.get(C.ACTIVE_FEATURE)))) {
       map.setView(activeFeature.geometry.coordinates, C.MAP_ZOOM)
