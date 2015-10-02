@@ -69,11 +69,18 @@ Template.map.onRendered(function () {
 
       // add marker cluster
       markers = new L.MarkerClusterGroup({
+        // pointToLayer: function(cluster) {
+        //   return L.circleMarker({
+        //     // show the number of markers in the cluster on the icon.
+        //     'raidus': cluster.getChildCount(),
+        //     'marker-color': '#E1272A'
+        //   })
+        // },
         iconCreateFunction: function(cluster) {
           return L.mapbox.marker.icon({
             // show the number of markers in the cluster on the icon.
             'marker-symbol': cluster.getChildCount(),
-            'marker-color': '#330066'
+            'marker-color': 'E1272A'
           })
         }
       }).addTo(map)
@@ -85,7 +92,7 @@ Template.map.onRendered(function () {
       userMarker = L.marker(geoLoc, {
         icon: L.mapbox.marker.icon({
           'marker-symbol': 'bicycle', 
-          'marker-color':  '60c4f7'
+          'marker-color':  'E1272A'
         }),
       }).addTo(map)
       
@@ -106,11 +113,13 @@ Template.map.onRendered(function () {
       let loc = new L.LatLng(...feature.geometry.coordinates),
           title = `${feature.properties.id}, ${feature.properties.date}`,
           belongsToUser = feature.properties.owner === Meteor.userId(),
+          // marker = L.circleMarker(loc, {
+          // fillColor: belongsToUser ? '#FF0033' : '#330066',
           marker = L.marker(loc, {
             draggable: userMarker,
             icon: L.mapbox.marker.icon({
-              'marker-symbol': 'danger', 
-              'marker-color': belongsToUser ? 'FF0033' : '330066'
+              'marker-symbol': 'danger',
+              'marker-color': belongsToUser ? 'FF0033' : 'E1272A'
             }),
           })
 
